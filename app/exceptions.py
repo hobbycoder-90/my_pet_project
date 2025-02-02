@@ -7,6 +7,16 @@ BookingNotFoundExeption = HTTPException(
     detail="Booking not found",
 )
 
+RoomCannotBeBooked = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Не осталось свободных номеров"
+)
+
+BookingNotMyExeption = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Its not your booking",
+)
+
 
 # Hotels exceptions
 HotelNotFoundExeption = HTTPException(
