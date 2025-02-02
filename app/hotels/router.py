@@ -100,4 +100,7 @@ async def update_hotel_room_quantity_and_services_and_image(hotel_id : int, hote
 
 @router.delete("/{hotel_id}/delete", response_model=HotelResponseSchema, status_code=202)
 async def delete_hotel_by_id(hotel_id: int):
+    hotel = await HotelDAO.find_by_id(hotel_id)
+    if not hotel:
+        raise HotelNotFoundExeption
     return await HotelDAO.delete(hotel_id)

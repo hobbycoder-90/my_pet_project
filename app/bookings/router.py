@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import update
-
 from app.database import async_session_maker
 from app.exceptions import BookingNotFoundExeption
 
@@ -8,10 +6,9 @@ from app.auth.dependencies import get_current_user
 
 from app.users.schema import UserResponseSchema
 
-from app.bookings.models import Bookings
 from app.users.models import Users
 from app.bookings.dao import BookingDAO
-from app.bookings.schema import BookingResponseSchema, BookingUpdateDate, BookingCreateSchema
+from app.bookings.schema import BookingResponseSchema, BookingCreateSchema
 from app.exceptions import RoomCannotBeBooked, BookingNotMyExeption
 
 
@@ -49,6 +46,8 @@ async def add_booking(booking_data: BookingCreateSchema, user: Users = Depends(g
 @router.delete("/{booking_id}/delete", response_model=BookingResponseSchema, status_code=202)
 async def delete_my_booking_by_id(booking_id:int, user: Users = Depends(get_current_user)):
     booking = await BookingDAO.find_by_id(booking_id)
-    if booking.user_id != user.id:
+    if not booking:
+        raise BookingNotFoundExeption
+    elif booking.user_id != user.id:
         raise BookingNotMyExeption
     return await BookingDAO.delete(booking_id)
