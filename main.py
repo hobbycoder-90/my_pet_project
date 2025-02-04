@@ -10,6 +10,8 @@ from app.auth.router import router as auth_router
 from app.hotels.router import router as hotels_router
 from app.rooms.router import router as rooms_router
 
+from app.pages.router import router as router_pages
+
 
 app = FastAPI(
     title="FastAPI PetProject Bookings Hotel",
@@ -30,6 +32,8 @@ app.include_router(users_router)
 app.include_router(hotels_router)
 app.include_router(rooms_router)
 app.include_router(bookings_router)
+
+app.include_router(router_pages)
 
 
 

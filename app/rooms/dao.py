@@ -18,7 +18,7 @@ class RoomDAO(BaseDAO):
     @classmethod
     async def update_hotel_rooms_quantity(cls, hotel_id:int, rooms_quantity: int):
         async with async_session_maker() as session:
-            hotel_exis = await HotelDAO.find_by_id(hotel_id)
+            hotel_exis = await HotelDAO.find_one_or_none(id=hotel_id)
             if not hotel_exis:
                 raise HotelNotFoundExeption
             

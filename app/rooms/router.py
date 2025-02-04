@@ -6,6 +6,7 @@ from app.rooms.models import Rooms
 from app.rooms.schema import RoomResponseSchema, RoomCreateSchema, RoomUpdate, RoomUpdateDescription, RoomUpdateImageSchema, RoomUpdatePrice, RoomUpdateQuantitySchema, RoomUpdateServicesSchema
 from app.rooms.dao import RoomDAO
 from app.database import async_session_maker
+from app.hotels.dao import HotelDAO
 
 
 
@@ -24,14 +25,20 @@ async def get_all_rooms():
 
 @router.get("/{room_id}", response_model=RoomCreateSchema, status_code=200)
 async def get_room_by_id(room_id: int):
-    return await RoomDAO.find_by_id(room_id)
+    result = await RoomDAO.find_one_or_none(id=room_id)
+    if not result:
+        raise RoomNotFoundExeption 
+    return result
 
 
 @router.post("/add", response_model=RoomResponseSchema, status_code=201)
 async def add_room(room_data: RoomCreateSchema):
-    existing_room = await RoomDAO.find_by_filter(name=room_data.name, hotel_id=room_data.hotel_id)
+    existing_room = await RoomDAO.find_one_or_none(name=room_data.name)
     if existing_room:
         raise RoomAlreadyExistsExeption
+    existing_hotel = await HotelDAO.find_one_or_none(id = room_data.hotel_id)
+    if not existing_hotel:
+        raise HotelNotFoundExeption
     new_room = await RoomDAO.add(
             hotel_id = room_data.hotel_id,
             name = room_data.name,
@@ -47,7 +54,7 @@ async def add_room(room_data: RoomCreateSchema):
 @router.patch("/{room_id}/update_image", response_model=RoomResponseSchema, status_code=200)
 async def update_room_services(room_id:int, room_data: RoomUpdateImageSchema):
     async with async_session_maker() as session:
-        room_exis = await RoomDAO.find_by_id(room_id)
+        room_exis = await RoomDAO.find_one_or_none(id = room_id)
         if not room_exis:
             raise RoomNotFoundExeption
         query = update(Rooms).where(Rooms.id == room_id).values(
@@ -61,7 +68,7 @@ async def update_room_services(room_id:int, room_data: RoomUpdateImageSchema):
 @router.patch("/{room_id}/update_price", response_model=RoomResponseSchema, status_code=200)
 async def update_room_price(room_id:int, room_data: RoomUpdatePrice):
     async with async_session_maker() as session:
-        room_exis = await RoomDAO.find_by_id(room_id)
+        room_exis = await RoomDAO.find_one_or_none(id = room_id)
         if not room_exis:
             raise RoomNotFoundExeption
         query = update(Rooms).where(Rooms.id == room_id).values(
@@ -75,7 +82,7 @@ async def update_room_price(room_id:int, room_data: RoomUpdatePrice):
 @router.patch("/{room_id}/update_description", response_model=RoomResponseSchema, status_code=200)
 async def update_room_description(room_id:int, room_data: RoomUpdateDescription):
     async with async_session_maker() as session:
-        room_exis = await RoomDAO.find_by_id(room_id)
+        room_exis = await RoomDAO.find_one_or_none(id = room_id)
         if not room_exis:
             raise RoomNotFoundExeption
         query = update(Rooms).where(Rooms.id == room_id).values(
@@ -89,7 +96,7 @@ async def update_room_description(room_id:int, room_data: RoomUpdateDescription)
 @router.patch("/{room_id}/update_services", response_model=RoomResponseSchema, status_code=200)
 async def update_room_services(room_id:int, room_data: RoomUpdateServicesSchema):
     async with async_session_maker() as session:
-        room_exis = await RoomDAO.find_by_id(room_id)
+        room_exis = await RoomDAO.find_one_or_none(id = room_id)
         if not room_exis:
             raise RoomNotFoundExeption
         query = update(Rooms).where(Rooms.id == room_id).values(
@@ -103,7 +110,7 @@ async def update_room_services(room_id:int, room_data: RoomUpdateServicesSchema)
 @router.patch("/{room_id}/update_quantity", response_model=RoomResponseSchema, status_code=200)
 async def update_room_quantity(room_id:int, room_data: RoomUpdateQuantitySchema):
     async with async_session_maker() as session:
-        room_exis = await RoomDAO.find_by_id(room_id)
+        room_exis = await RoomDAO.find_one_or_none(id = room_id)
         if not room_exis:
             raise RoomNotFoundExeption
         query = update(Rooms).where(Rooms.id == room_id).values(
@@ -116,10 +123,10 @@ async def update_room_quantity(room_id:int, room_data: RoomUpdateQuantitySchema)
         return upd_room.mappings().one()
 
 
-@router.put("/{room_id}/update_quantity", response_model=RoomResponseSchema, status_code=200)
+@router.put("/{room_id}/update", response_model=RoomResponseSchema, status_code=200)
 async def update_room(room_id:int, room_data: RoomUpdate):
     async with async_session_maker() as session:
-        room_exis = await RoomDAO.find_by_id(room_id)
+        room_exis = await RoomDAO.find_one_or_none(id = room_id)
         if not room_exis:
             raise RoomNotFoundExeption
         query = update(Rooms).where(Rooms.id == room_id).values(
